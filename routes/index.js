@@ -26,6 +26,8 @@ router.get('/checkloginstatus', async function (req, res, next) {
     await client.connect()
     let userDBCollection = client.db(database).collection('myusers');
 
+    console.log(req.headers)
+
     if (req.headers.cookie) {
       let jwtToken = req.headers.cookie.slice(9)
       let verifiedUser = jwt.verify(jwtToken, process.env.RANDOM_KEY_FOR_JWT);
@@ -40,7 +42,8 @@ router.get('/checkloginstatus', async function (req, res, next) {
       res.sendStatus(400)
     }
   } catch (error) {
-    res.status(500).json({ message: error })
+    console.log(error)
+    res.status(500).json({ message: "Unknown error. Please try agin" })
   } finally {
     await client.close()
   }
@@ -72,7 +75,6 @@ router.post("/login", async (req, res) => {
     } else {
       res.status(500).json({ message: "No user found" })
     }
-
   } catch (error) {
     res.status(500).json({ message: error })
   } finally {
@@ -89,10 +91,7 @@ router.post("/register", async (req, res) => {
     let user = await userDBCollection.findOne({
       email: req.body.email
     });
-
-
     if (!user) {
-
       console.log("user is", user)
       let salt = await bcrypt.genSalt(10);
       let hashedPass = await bcrypt.hash(req.body.password, salt);
@@ -102,20 +101,15 @@ router.post("/register", async (req, res) => {
       if (insertion.insertedCount === 1) {
         console.log("user inserted")
         res.status(200).json({
-          "message": "user inserted"
+          message: "user inserted"
         })
       }
-
     } else {
       res.status(500).json({ message: "User exists. Please try to recover your password" })
     }
-
   } catch (error) {
-
     console.log(error)
-
     res.status(500).json({ message: "Unknown error occured. Contact admin" })
-
   } finally {
     await client.close();
   }
