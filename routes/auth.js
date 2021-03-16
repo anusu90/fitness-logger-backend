@@ -17,6 +17,7 @@ async function myAuthentication(req, res, next) {
             let verifiedUser = jwt.verify(jwtToken, process.env.RANDOM_KEY_FOR_JWT);
             let user = await userDBCollection.findOne({ _id: ObjectID(verifiedUser.user._id) });
             if (user) {
+                req.body.user_id = user.email
                 next();
             } else {
                 res.status(404).json({ message: "Authentication failed. Logout and try again" })
@@ -24,7 +25,6 @@ async function myAuthentication(req, res, next) {
         } catch (error) {
             console.log(error)
             res.status(500).json({ message: "Unknown error. Please try agin" })
-
         }
     }
 
