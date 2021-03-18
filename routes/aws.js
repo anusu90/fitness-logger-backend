@@ -80,4 +80,30 @@ function queryExerTable(reqObj) {
     return exerPromise
 }
 
-module.exports = { queryExercise, queryStatement, queryExerTable };
+function queryFreeStatement(statement) {
+    var con = mysql.createConnection({
+        host: process.env.RDS_HOSTNAME,
+        user: process.env.RDS_USERNAME,
+        password: process.env.RDS_PASSWORD,
+        port: process.env.RDS_PORT,
+        database: process.env.RDS_DB_NAME
+    });
+
+
+
+    console.log(statement)
+
+    let exerPromise = new Promise((res, rej) => {
+        con.connect(function (err) {
+            if (err) throw err;
+            con.query(`${statement}`, function (err, result, fields) {
+                if (err) rej(err);
+                con.end()
+                res(result)
+            });
+        });
+    })
+    return exerPromise
+}
+
+module.exports = { queryExercise, queryStatement, queryExerTable, queryFreeStatement };
